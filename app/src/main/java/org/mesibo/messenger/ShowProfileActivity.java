@@ -61,7 +61,7 @@ import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
 
 import com.mesibo.api.Mesibo;
-
+// unpure class
 public class ShowProfileActivity extends AppCompatActivity implements ShowProfileFragment.OnFragmentInteractionListener, Mesibo.FileTransferListener, Mesibo.UserProfileUpdateListener {
 
     SquareImageView mUsermageView;
@@ -73,32 +73,41 @@ public class ShowProfileActivity extends AppCompatActivity implements ShowProfil
     String mPeer = null;
     private String mProfilePicturePath = null;
 
+    // unpure method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_user_profile);
-        mToolbar = (Toolbar) findViewById(R.id.up_toolbar);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Bundle args = getIntent().getExtras();
-        if (null == args) {
+        // mark:1 because of guard with inital setup, shoud setup be in seperate function.
+        super.onCreate(savedInstanceState); // dependency via inheritence, void method always unpure
+        setContentView(R.layout.activity_show_user_profile); // void method always unpure
+        // Dont look for things, ask for things
+        // inject what you need via parameters or members
+        // try extract method
+        mToolbar = (Toolbar) findViewById(R.id.up_toolbar);
+        setSupportActionBar(mToolbar); // void method always unpure
+        getSupportActionBar()
+                .setDisplayHomeAsUpEnabled(true); // void method always unpure
+        Bundle args = getIntent().getExtras(); // Dont look for things, ask for things
+        //end-mark:1
+        if (null == args) { // Things given should not be null
             return;
         }
 
-        mPeer = args.getString("peer");
-        mGroupId = args.getLong("groupid");
+        mPeer = args.getString("peer"); // Dont look for things, ask for things
+        mGroupId = args.getLong("groupid"); // Dont look for things, ask for things
 
+        //mark:2 Dont look for things, ask for things, will remove un needed mutation
         mUserProfile = null;
 
         if (mGroupId > 0) {
-            mUserProfile = Mesibo.getUserProfile(mGroupId);
+            mUserProfile = Mesibo.getUserProfile(mGroupId);// Dont look for things, ask for things
         } else {
-            mUserProfile = Mesibo.getUserProfile(mPeer);
+            mUserProfile = Mesibo.getUserProfile(mPeer);// Dont look for things, ask for things
         }
-        mUsermageView = (SquareImageView) findViewById(R.id.up_image_profile);
+        // end-mark:2
+        mUsermageView = (SquareImageView) findViewById(R.id.up_image_profile); // Dont look for things, ask for things
 
-        Mesibo.addListener(this);
+        Mesibo.addListener(this); // void method always unpure
 
         mUsermageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,20 +115,23 @@ public class ShowProfileActivity extends AppCompatActivity implements ShowProfil
                 UIManager.launchImageViewer(ShowProfileActivity.this, mProfilePicturePath);
             }
 
-        });
+        }); // void method always unpure
 
-        TextView userName = (TextView) findViewById(R.id.up_user_name);
-        TextView userstatus = (TextView) findViewById(R.id.up_current_status);
+        TextView userName = (TextView) findViewById(R.id.up_user_name); // Dont look for things, ask for things
+        TextView userstatus = (TextView) findViewById(R.id.up_current_status); // Dont look for things, ask for things
 
-        userName.setText(mUserProfile.name);
-        long lastSeen = Mesibo.getTimestamp() - mUserProfile.lastActiveTime;
-        userstatus.setVisibility(View.VISIBLE);
+        userName.setText(mUserProfile.name); // void method always unpure
+        long lastSeen = Mesibo.getTimestamp() - mUserProfile.lastActiveTime; // make final
+        userstatus.setVisibility(View.VISIBLE); // void method always unpure
         if(lastSeen <= 60000) {
-            userstatus.setText("Online");
+            userstatus.setText("Online"); // void method always unpure
         }
         else {
+            //mark:3 extraact pure-ish function returning seenStatus
             String seenStatus = "";
+            // Bad, Reuse of local variable
             lastSeen = lastSeen/60000; //miutes
+            // peel from other wise pure section
             if(mUserProfile.groupid > 0 || 0 == mUserProfile.lastActiveTime) {
                 userstatus.setVisibility(View.GONE);
             }
@@ -136,6 +148,7 @@ public class ShowProfileActivity extends AppCompatActivity implements ShowProfil
             } else {
                 seenStatus = "a few moments before";
             }
+            // end-mark:3
 
             userstatus.setText("Last seen " + seenStatus);
 
@@ -144,17 +157,17 @@ public class ShowProfileActivity extends AppCompatActivity implements ShowProfil
 
         CollapsingToolbarLayout collapsingToolbar =
                 findViewById(R.id.up_collapsing_toolbar);
-        collapsingToolbar.setTitle("  ");
-        mCoordinatorLayout = findViewById(R.id.up_profile_root);
-        mAppBarLayout = findViewById(R.id.up_appbar);
+        collapsingToolbar.setTitle("  "); // void method always unpure
+        mCoordinatorLayout = findViewById(R.id.up_profile_root);// Dont look for things, ask for things
+        mAppBarLayout = findViewById(R.id.up_appbar);// Dont look for things, ask for things
         mAppBarLayout.post(new Runnable() {
             @Override
             public void run() {
 
                 setAppBarOffset(-250);
             }
-        });
-
+        }); // void method always unpure
+        // void method always unpure
         mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -176,10 +189,10 @@ public class ShowProfileActivity extends AppCompatActivity implements ShowProfil
 
 
             }
-        });
+        }); // void method always unpure
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        FragmentManager fragmentManager = getSupportFragmentManager(); // Dont look for things, ask for things
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction(); // Dont look for things, ask for things
         ShowProfileFragment showUserProfileDetailsFragment = ShowProfileFragment.newInstance(mUserProfile);
         fragmentTransaction.add(R.id.up_fragment, showUserProfileDetailsFragment, "up");
         fragmentTransaction.commit();
